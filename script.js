@@ -1,55 +1,47 @@
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.querySelector('.container');
-    const sizeIncreaseBtn = document.getElementById('sizeIncreaseBtn');
-    const sizeDecreaseBtn = document.getElementById('sizeDecreaseBtn');
-    const sizeSlider = document.getElementById('sizeSlider');
-    const sizeValue = document.getElementById('sizeValue');
-    const distortBtn = document.getElementById('distortBtn');
-    const distortSlider = document.getElementById('distortSlider');
-    const distortValue = document.getElementById('distortValue');
+    const strobeBtn = document.getElementById('strobeBtn');
+    const dayNightBtn = document.getElementById('dayNightBtn');
     
     // Lista de emojis para usar aleatoriamente
     const emojis = ['😀', '😂', '🤣', '😍', '🥰', '😎', '🤩', '😜', '🤪', '😇', '🥳', '🤯', '👽', '🚀', '💥', '⭐', '🌈', '🍕', '🍦', '🎮'];
     
-    // Variables para controlar el estado de los emojis
-    let emojiSize = 1;
-    let isDistorted = false;
-    let distortIntensity = 50;
+    // Variables para controlar el estado de los emojis y efectos
+    let isStrobeActive = false;
+    let strobeInterval;
+    let isDayMode = false;
     
-    // Crear corazones flotantes en el fondo
-    function createHearts() {
+    // Crear estrellas en el cielo nocturno
+    function createStars() {
         const body = document.body;
-        const heartSymbols = ['❤️', '💙', '💜', '💖', '💗', '💓', '💕'];
         
-        // Crear 20 corazones
-        for (let i = 0; i < 20; i++) {
-            setTimeout(() => {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-                
-                // Posición horizontal aleatoria
-                const left = Math.random() * 100;
-                heart.style.left = `${left}%`;
-                
-                // Duración aleatoria de la animación
-                const duration = Math.random() * 10 + 5;
-                heart.style.animationDuration = `${duration}s`;
-                
-                // Añadir el corazón al body
-                body.appendChild(heart);
-                
-                // Eliminar el corazón después de que termine la animación
-                setTimeout(() => {
-                    body.removeChild(heart);
-                }, duration * 1000);
-            }, i * 300); // Crear corazones con un pequeño retraso entre ellos
+        // Crear 50 estrellas
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Tamaño aleatorio entre 2px y 4px
+            const size = Math.random() * 2 + 2;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            // Posición aleatoria
+            const left = Math.random() * 100;
+            const top = Math.random() * 40; // Solo en la parte superior del cielo
+            star.style.left = `${left}%`;
+            star.style.top = `${top}%`;
+            
+            // Duración aleatoria de la animación
+            const duration = Math.random() * 3 + 1;
+            star.style.animationDuration = `${duration}s`;
+            
+            // Añadir la estrella al body
+            body.appendChild(star);
         }
     }
     
-    // Iniciar la creación de corazones y repetir cada cierto tiempo
-    createHearts();
-    setInterval(createHearts, 10000);
+    // Iniciar la creación de estrellas
+    createStars();
     
     // Función para crear un emoji al hacer clic
     function createEmoji(e) {
@@ -69,14 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
         emoji.style.left = `${x}px`;
         emoji.style.top = `${y}px`;
         
-        // Aplicar tamaño actual
-        emoji.style.transform = `scale(${emojiSize})`;
-        
-        // Aplicar distorsión si está activa
-        if (isDistorted) {
-            emoji.classList.add('distorted');
-            emoji.style.setProperty('--distort-intensity', distortIntensity + '%');
-        }
+        // Tamaño aleatorio entre 0.5 y 3
+        const randomSize = Math.random() * 2.5 + 0.5;
+        emoji.style.transform = `scale(${randomSize})`;
         
         // Añadir el emoji al contenedor
         container.appendChild(emoji);
@@ -95,59 +82,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // Evento para crear emojis al hacer clic
     container.addEventListener('click', createEmoji);
     
-    // Funciones para controlar el tamaño de los emojis
-    sizeIncreaseBtn.addEventListener('click', () => {
-        emojiSize = Math.min(emojiSize + 0.5, 5);
-        updateSizeControls();
-    });
-    
-    sizeDecreaseBtn.addEventListener('click', () => {
-        emojiSize = Math.max(emojiSize - 0.5, 0.5);
-        updateSizeControls();
-    });
-    
-    sizeSlider.addEventListener('input', () => {
-        emojiSize = parseFloat(sizeSlider.value);
-        updateSizeControls();
-    });
-    
-    function updateSizeControls() {
-        sizeSlider.value = emojiSize;
-        sizeValue.textContent = emojiSize.toFixed(1) + 'x';
+    // Función para activar/desactivar el efecto estrobo
+    strobeBtn.addEventListener('click', () => {
+        isStrobeActive = !isStrobeActive;
         
-        // Actualizar todos los emojis existentes
-        document.querySelectorAll('.emoji').forEach(emoji => {
-            emoji.style.transform = `scale(${emojiSize})`;
-        });
-    }
-    
-    // Funciones para controlar la distorsión de los emojis
-    distortBtn.addEventListener('click', () => {
-        isDistorted = !isDistorted;
-        
-        // Actualizar texto del botón
-        distortBtn.textContent = isDistorted ? 'Normalizar Emojis' : 'Distorsionar Emojis';
-        
-        // Aplicar o quitar la distorsión a todos los emojis existentes
-        document.querySelectorAll('.emoji').forEach(emoji => {
-            if (isDistorted) {
-                emoji.classList.add('distorted');
-                emoji.style.setProperty('--distort-intensity', distortIntensity + '%');
-            } else {
-                emoji.classList.remove('distorted');
-            }
-        });
-    });
-    
-    distortSlider.addEventListener('input', () => {
-        distortIntensity = parseInt(distortSlider.value);
-        distortValue.textContent = distortIntensity + '%';
-        
-        // Actualizar la intensidad de distorsión en los emojis existentes si la distorsión está activa
-        if (isDistorted) {
-            document.querySelectorAll('.emoji').forEach(emoji => {
-                emoji.style.setProperty('--distort-intensity', distortIntensity + '%');
-            });
+        if (isStrobeActive) {
+            strobeBtn.textContent = 'Desactivar Estrobo';
+            document.body.classList.add('strobe-active');
+            
+            // Crear el efecto estrobo con un intervalo
+            strobeInterval = setInterval(() => {
+                document.body.style.backgroundColor = getRandomColor();
+            }, 100);
+        } else {
+            strobeBtn.textContent = 'Efecto Estrobo';
+            document.body.classList.remove('strobe-active');
+            clearInterval(strobeInterval);
+            
+            // Restaurar el color de fondo según el modo día/noche
+            document.body.style.backgroundColor = isDayMode ? '#87CEEB' : '#0a0e29';
         }
     });
+    
+    // Función para cambiar entre modo día y noche
+    dayNightBtn.addEventListener('click', () => {
+        isDayMode = !isDayMode;
+        
+        if (isDayMode) {
+            dayNightBtn.textContent = 'Cambiar a Noche';
+            document.body.classList.add('day-mode');
+        } else {
+            dayNightBtn.textContent = 'Cambiar a Día';
+            document.body.classList.remove('day-mode');
+        }
+        
+        // Si el estrobo está activo, no cambiar el color de fondo
+        if (!isStrobeActive) {
+            document.body.style.backgroundColor = isDayMode ? '#87CEEB' : '#0a0e29';
+        }
+    });
+    
+    // Función para generar un color aleatorio para el efecto estrobo
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
 });
